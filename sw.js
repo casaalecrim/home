@@ -22,8 +22,8 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(title, { body, icon: './icon-192.png', badge: './favicon-32.png' });
 });
 
-const CACHE_NAME = 'casa-alecrim-shell-v4';
-const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
+const CACHE_NAME = 'casa-alecrim-shell-v5';
+const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png', './sg-logo.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {}));
