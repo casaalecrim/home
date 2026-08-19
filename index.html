@@ -271,6 +271,8 @@ tr.subrow td:first-child{padding-left:26px;color:var(--ink-soft);font-size:12.5p
 .sheet button.sheetitem:last-child{border-bottom:none;}
 .sheet button.sheetitem svg{width:19px;height:19px;opacity:.75;}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging-compat.js"></script>
 </head>
 <body>
 
@@ -287,6 +289,8 @@ tr.subrow td:first-child{padding-left:26px;color:var(--ink-soft);font-size:12.5p
     <button class="navitem" data-tab="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="8" r="6"/><path d="M8 2v6l4 2"/><path d="M18 14v6M22 14v6M14 17v3"/></svg>Relatórios</button>
     <button class="navitem" data-tab="objetivos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></svg>Objetivos</button>
     <button class="navitem" data-tab="supermercado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7h18l-1.5 11a2 2 0 01-2 1.7H6.5a2 2 0 01-2-1.7L3 7z"/><path d="M8 7V5a4 4 0 018 0v2"/></svg>Supermercado</button>
+    <button class="navitem" data-tab="compras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Lista de Compras</button>
+    <button class="navitem" data-tab="tarefas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>Tarefas da Casa</button>
     <button class="navitem" data-tab="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06A1.7 1.7 0 0015 19.4a1.7 1.7 0 00-1 1.55V21a2 2 0 11-4 0v-.09A1.7 1.7 0 008.6 19.4a1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.7 1.7 0 004.6 15a1.7 1.7 0 00-1.55-1H3a2 2 0 110-4h.09A1.7 1.7 0 004.6 8.6a1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06A1.7 1.7 0 008.6 4.6a1.7 1.7 0 001-1.55V3a2 2 0 114 0v.09A1.7 1.7 0 0015 4.6a1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06A1.7 1.7 0 0019.4 8.6a1.7 1.7 0 001.55 1H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.55 1z"/></svg>Configurações</button>
     <div class="sidenav-foot">Stela &amp; Gabriel · 2026<br>dados salvos neste navegador</div>
   </nav>
@@ -485,6 +489,45 @@ tr.subrow td:first-child{padding-left:26px;color:var(--ink-soft);font-size:12.5p
         <div id="superDash"></div>
       </section>
 
+      <!-- ============ LISTA DE COMPRAS ============ -->
+      <section class="tab" id="tab-compras">
+        <div class="card pad-lg" style="margin-bottom:18px;">
+          <div class="sectiontitle" style="margin-top:0;"><h3 style="font-size:18px;">Nova lista</h3></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="field" style="flex:1;min-width:200px;"><label>Item</label><input type="text" id="comprasItemInput" placeholder="Ex: Leite" onkeydown="if(event.key==='Enter')addComprasItem()"></div>
+            <button class="btn primary" onclick="addComprasItem()">+ Adicionar</button>
+          </div>
+        </div>
+        <div class="card pad-lg">
+          <div class="sectiontitle" style="margin-top:0;"><h3 style="font-size:16px;">Sua lista</h3><button class="qbtn" id="btnComprasFinalizar">Todos itens comprados</button></div>
+          <div id="comprasListRoot"></div>
+        </div>
+      </section>
+
+      <!-- ============ TAREFAS DA CASA ============ -->
+      <section class="tab" id="tab-tarefas">
+        <div class="card pad-lg" style="margin-bottom:18px;">
+          <div class="sectiontitle" style="margin-top:0;"><h3 style="font-size:18px;">Nova tarefa</h3></div>
+          <div class="grid two">
+            <div class="field"><label>O que precisa ser feito</label><input type="text" id="tarefaTituloInput" placeholder="Ex: Trocar filtro do ar-condicionado"></div>
+            <div class="field"><label>Prazo (opcional)</label><input type="date" id="tarefaPrazoInput"></div>
+          </div>
+          <div class="field"><label>Prioridade</label>
+            <div class="pillselect" id="tarefaPrioridadePills">
+              <button type="button" class="pillopt active" data-val="alta" onclick="selectTarefaPrioridade('alta')">Alta</button>
+              <button type="button" class="pillopt" data-val="media" onclick="selectTarefaPrioridade('media')">Média</button>
+              <button type="button" class="pillopt" data-val="baixa" onclick="selectTarefaPrioridade('baixa')">Baixa</button>
+            </div>
+          </div>
+          <button class="btn primary" style="margin-top:6px;" onclick="addTarefa()">+ Adicionar tarefa</button>
+        </div>
+        <div class="card pad-lg">
+          <div class="sectiontitle" style="margin-top:0;"><h3 style="font-size:16px;">Pendentes</h3></div>
+          <div id="tarefasListRoot"></div>
+          <div id="tarefasConcluidasRoot" style="margin-top:22px;"></div>
+        </div>
+      </section>
+
       <!-- ============ CONFIGURAÇÕES ============ -->
       <section class="tab" id="tab-config">
         <div class="grid two">
@@ -501,6 +544,12 @@ tr.subrow td:first-child{padding-left:26px;color:var(--ink-soft);font-size:12.5p
               </div>
               <div style="margin-top:10px;"><button class="btn ghost" id="syncNowBtn">Sincronizar agora</button></div>
               <div id="syncStatusText" style="font-size:12px;color:var(--ink-soft);margin-top:10px;"></div>
+            </div>
+            <div class="card pad-lg setgroup">
+              <h4>Notificações</h4>
+              <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.6;">Receba um aviso no celular quando uma conta ou fatura estiver perto de vencer — funciona mesmo com o app fechado.</p>
+              <button class="btn primary" id="pushEnableBtn">Ativar notificações neste aparelho</button>
+              <div id="pushStatusText" style="font-size:12px;color:var(--ink-soft);margin-top:10px;"></div>
             </div>
             <div class="card pad-lg setgroup">
               <h4>Contas</h4>
@@ -646,7 +695,9 @@ function defaultState(){
     transactions: [],
     planning: {},
     goals: [],
-    supermercado: { uploads: [] }
+    supermercado: { uploads: [] },
+    shoppingList: [],
+    homeTasks: []
   };
 }
 
@@ -671,7 +722,7 @@ function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
 // AUTOMATICAMENTE em qualquer dispositivo, sem precisar configurar nada
 // em cada navegador. Deixe vazio ('') enquanto ainda não tiver a URL —
 // nesse caso o app usa o campo manual em Configurações como alternativa.
-const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyp-rkDXTezaKW64i-xti2q7bsL4HdZd7AB-JRvOS4cvPasemzuY28kzac7tIkQzWDTXg/exec';
+const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbxaj5T3WgixXhCpGVVA9n0Gahmb97R-RSJy3W9LGbo_QMgmQo7-yjRclsYW46oGHqKB/exec';
 
 const SYNC_URL_KEY = 'casaAlecrimSyncUrl';
 let localUpdatedAt = 0;
@@ -791,6 +842,43 @@ document.getElementById('syncNowBtn').addEventListener('click', async ()=>{
 });
 
 /* ---------------------------------------------------------- */
+/* NOTIFICAÇÕES PUSH (Firebase Cloud Messaging)                */
+/* ---------------------------------------------------------- */
+// Preencha com os valores do SEU projeto Firebase (Configurações do projeto
+// > Geral > seus apps > app da Web). A VAPID_KEY fica em Configurações do
+// projeto > Cloud Messaging > Certificados push da Web.
+const FIREBASE_CONFIG = {
+  apiKey: "COLE_AQUI_A_API_KEY",
+  authDomain: "COLE_AQUI.firebaseapp.com",
+  projectId: "COLE_AQUI_O_PROJECT_ID",
+  messagingSenderId: "COLE_AQUI_O_SENDER_ID",
+  appId: "COLE_AQUI_O_APP_ID"
+};
+const VAPID_KEY = "COLE_AQUI_A_VAPID_KEY";
+
+function setPushStatus(text){ const el = document.getElementById('pushStatusText'); if(el) el.textContent = text; }
+
+async function enablePush(){
+  const url = getSyncUrl();
+  if(!url){ toast('Conecte a sincronização com a planilha primeiro.'); return; }
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)){ setPushStatus('Este navegador não suporta notificações.'); return; }
+  try{
+    setPushStatus('Solicitando permissão…');
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ setPushStatus('Permissão negada — ative nas configurações do navegador/celular.'); return; }
+    const reg = await navigator.serviceWorker.ready;
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if(!token){ setPushStatus('Não foi possível gerar o token. Tente novamente.'); return; }
+    await fetch(url, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ action:'registerToken', token, label: navigator.userAgent.slice(0,60) }) });
+    setPushStatus('Notificações ativadas neste aparelho ✔');
+    toast('Notificações ativadas.');
+  }catch(err){ console.error(err); setPushStatus('Erro ao ativar: ' + err.message); }
+}
+document.getElementById('pushEnableBtn').addEventListener('click', enablePush);
+
+/* ---------------------------------------------------------- */
 /* CÁLCULOS FINANCEIROS                                        */
 /* ---------------------------------------------------------- */
 // ciclo de fechamento: em qual "janela" (nomeada pelo mês em que fecha) a compra cai
@@ -883,6 +971,8 @@ const TAB_TITLES = {
   relatorios:['Relatórios','categorias, contas e evolução mensal'],
   objetivos:['Objetivos','nossas metas financeiras'],
   supermercado:['Supermercado','análise das compras de mercado'],
+  compras:['Lista de Compras','anote e marque conforme for comprando'],
+  tarefas:['Tarefas da Casa','o que precisa ser feito, com prioridade e prazo'],
   config:['Configurações','contas, cartões e categorias']
 };
 let uiMonthInicio = currentMonthKey();
@@ -907,6 +997,8 @@ function goTab(tab){
   if(tab==='relatorios') renderRelatorios();
   if(tab==='objetivos') renderObjetivos();
   if(tab==='supermercado') renderSupermercado();
+  if(tab==='compras') renderCompras();
+  if(tab==='tarefas') renderTarefas();
   if(tab==='config') renderConfig();
 }
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>goTab(el.dataset.tab)));
@@ -919,6 +1011,8 @@ function openMaisSheet(){
       <button class="sheetitem" onclick="closeSheet();goTab('planejamento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5M10 19V9M16 19v-6M22 19H2"/></svg>Planejamento</button>
       <button class="sheetitem" onclick="closeSheet();goTab('objetivos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg>Objetivos</button>
       <button class="sheetitem" onclick="closeSheet();goTab('supermercado')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18l-1.5 11a2 2 0 01-2 1.7H6.5a2 2 0 01-2-1.7L3 7z"/></svg>Supermercado</button>
+      <button class="sheetitem" onclick="closeSheet();goTab('compras')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/></svg>Lista de Compras</button>
+      <button class="sheetitem" onclick="closeSheet();goTab('tarefas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Tarefas da Casa</button>
       <button class="sheetitem" onclick="closeSheet();goTab('config')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/></svg>Configurações</button>
     </div>`;
 }
@@ -1504,6 +1598,101 @@ function renderObjetivos(){
 }
 function deleteGoal(id){ if(!confirm('Excluir este objetivo?')) return; state.goals = state.goals.filter(g=>g.id!==id); saveState(); renderObjetivos(); }
 document.getElementById('btnNovoObjetivo').onclick = openGoalModal;
+
+/* ---------------------------------------------------------- */
+/* RENDER: LISTA DE COMPRAS                                     */
+/* ---------------------------------------------------------- */
+function addComprasItem(){
+  const input = document.getElementById('comprasItemInput');
+  const nome = input.value.trim();
+  if(!nome) return;
+  state.shoppingList.push({ id: uuid(), nome, comprado:false });
+  input.value = '';
+  saveState();
+  renderCompras();
+  input.focus();
+}
+function toggleComprasItem(id){
+  const it = state.shoppingList.find(i=>i.id===id);
+  if(it){ it.comprado = !it.comprado; saveState(); renderCompras(); }
+}
+function removeComprasItem(id){
+  state.shoppingList = state.shoppingList.filter(i=>i.id!==id);
+  saveState(); renderCompras();
+}
+function finalizarCompras(){
+  if(!state.shoppingList.length) return;
+  if(!confirm('Apagar a lista inteira? Use isso depois de já ter comprado tudo.')) return;
+  state.shoppingList = [];
+  saveState(); renderCompras();
+  toast('Lista de compras finalizada.');
+}
+document.getElementById('btnComprasFinalizar').addEventListener('click', finalizarCompras);
+function renderCompras(){
+  const root = document.getElementById('comprasListRoot');
+  if(!state.shoppingList.length){ root.innerHTML = `<div class="emptystate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/></svg><div>Lista vazia. Adicione o primeiro item acima.</div></div>`; return; }
+  const pendentes = state.shoppingList.filter(i=>!i.comprado);
+  const comprados = state.shoppingList.filter(i=>i.comprado);
+  const rowHtml = i => `<div style="display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);">
+      <input type="checkbox" ${i.comprado?'checked':''} onchange="toggleComprasItem('${i.id}')" style="width:18px;height:18px;accent-color:var(--verde-oliva);cursor:pointer;flex-shrink:0;">
+      <span style="flex:1;font-size:14px;${i.comprado?'text-decoration:line-through;color:var(--ink-soft);':''}">${i.nome}</span>
+      <button class="icobtn" onclick="removeComprasItem('${i.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+    </div>`;
+  root.innerHTML = pendentes.map(rowHtml).join('') + (comprados.length ? `<div style="font-size:11.5px;color:var(--ink-soft);margin:14px 0 4px;">Já no carrinho (${comprados.length})</div>` + comprados.map(rowHtml).join('') : '');
+}
+
+/* ---------------------------------------------------------- */
+/* RENDER: TAREFAS DA CASA                                      */
+/* ---------------------------------------------------------- */
+let tarefaPrioridadeSel = 'alta';
+function selectTarefaPrioridade(p){
+  tarefaPrioridadeSel = p;
+  document.querySelectorAll('#tarefaPrioridadePills .pillopt').forEach(b=>b.classList.toggle('active', b.dataset.val===p));
+}
+function addTarefa(){
+  const input = document.getElementById('tarefaTituloInput');
+  const titulo = input.value.trim();
+  if(!titulo){ toast('Descreva a tarefa.'); return; }
+  const prazo = document.getElementById('tarefaPrazoInput').value || null;
+  state.homeTasks.push({ id: uuid(), titulo, prioridade: tarefaPrioridadeSel, prazo, feita:false, criadaEm: Date.now() });
+  input.value = '';
+  document.getElementById('tarefaPrazoInput').value = '';
+  saveState();
+  renderTarefas();
+  toast('Tarefa adicionada.');
+}
+function toggleTarefa(id){
+  const t = state.homeTasks.find(x=>x.id===id);
+  if(t){ t.feita = !t.feita; saveState(); renderTarefas(); }
+}
+function removeTarefa(id){
+  state.homeTasks = state.homeTasks.filter(x=>x.id!==id);
+  saveState(); renderTarefas();
+}
+const PRIORIDADE_LABEL = { alta:'Alta', media:'Média', baixa:'Baixa' };
+const PRIORIDADE_COR = { alta:{bg:'#FBEAEE',fg:'var(--rosa-coral)'}, media:{bg:'#FFF3DD',fg:'var(--mostarda)'}, baixa:{bg:'#E3EFEE',fg:'var(--verde-petroleo)'} };
+const PRIORIDADE_ORDEM = { alta:0, media:1, baixa:2 };
+function tarefaRowHtml(t){
+  const cor = PRIORIDADE_COR[t.prioridade] || PRIORIDADE_COR.baixa;
+  const atrasada = t.prazo && !t.feita && t.prazo < todayStr();
+  return `<div style="display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);">
+    <input type="checkbox" ${t.feita?'checked':''} onchange="toggleTarefa('${t.id}')" style="width:18px;height:18px;accent-color:var(--verde-oliva);cursor:pointer;flex-shrink:0;">
+    <div style="flex:1;">
+      <div style="font-size:14px;${t.feita?'text-decoration:line-through;color:var(--ink-soft);':''}">${t.titulo}</div>
+      ${t.prazo ? `<div style="font-size:11.5px;color:${atrasada?'var(--vermelho-tomate)':'var(--ink-soft)'};margin-top:2px;">${atrasada?'Atrasada — ':'Prazo: '}${new Date(t.prazo+'T00:00:00').toLocaleDateString('pt-BR')}</div>` : ''}
+    </div>
+    <span class="tag-pill" style="background:${cor.bg};color:${cor.fg};">${PRIORIDADE_LABEL[t.prioridade]||t.prioridade}</span>
+    <button class="icobtn" onclick="removeTarefa('${t.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+  </div>`;
+}
+function renderTarefas(){
+  const pendRoot = document.getElementById('tarefasListRoot');
+  const doneRoot = document.getElementById('tarefasConcluidasRoot');
+  const pendentes = state.homeTasks.filter(t=>!t.feita).sort((a,b)=> (PRIORIDADE_ORDEM[a.prioridade]-PRIORIDADE_ORDEM[b.prioridade]) || ((a.prazo||'9999')<(b.prazo||'9999')?-1:1) );
+  const feitas = state.homeTasks.filter(t=>t.feita);
+  pendRoot.innerHTML = pendentes.length ? pendentes.map(tarefaRowHtml).join('') : `<div class="emptystate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><div>Nenhuma tarefa pendente. Adicione a primeira acima.</div></div>`;
+  doneRoot.innerHTML = feitas.length ? `<div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:4px;">Concluídas (${feitas.length})</div>` + feitas.map(tarefaRowHtml).join('') : '';
+}
 
 /* ---------------------------------------------------------- */
 /* RENDER: SUPERMERCADO                                         */

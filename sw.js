@@ -2,8 +2,27 @@
    Guarda em cache só o "esqueleto" do app (HTML, ícones, manifest) para abrir
    rápido e funcionar offline. Nunca guarda em cache as chamadas para a planilha
    (Apps Script) — essas sempre vão direto para a rede, para os dados nunca
-   ficarem desatualizados. */
-const CACHE_NAME = 'casa-alecrim-shell-v1';
+   ficarem desatualizados. Também recebe as notificações push (Firebase) e as
+   exibe mesmo com o app fechado. */
+importScripts('https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging-compat.js');
+
+// Precisa ser IGUAL ao FIREBASE_CONFIG do index.html.
+firebase.initializeApp({
+  apiKey: "COLE_AQUI_A_API_KEY",
+  authDomain: "COLE_AQUI.firebaseapp.com",
+  projectId: "COLE_AQUI_O_PROJECT_ID",
+  messagingSenderId: "COLE_AQUI_O_SENDER_ID",
+  appId: "COLE_AQUI_O_APP_ID"
+});
+const messaging = firebase.messaging();
+messaging.onBackgroundMessage((payload) => {
+  const title = (payload.notification && payload.notification.title) || 'Casa Alecrim';
+  const body = (payload.notification && payload.notification.body) || '';
+  self.registration.showNotification(title, { body, icon: './icon-192.png', badge: './favicon-32.png' });
+});
+
+const CACHE_NAME = 'casa-alecrim-shell-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', (event) => {
