@@ -1,0 +1,18 @@
+{
+  "name": "Casa Alecrim · Finanças",
+  "short_name": "Casa Alecrim",
+  "description": "Controle financeiro a dois — Stela & Gabriel",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F1EBDD",
+  "theme_color": "#16283A",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
