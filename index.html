@@ -754,7 +754,21 @@ async function initSync(){
   if(document.getElementById('syncUrlInput') && !DEFAULT_SYNC_URL) document.getElementById('syncUrlInput').value = url;
   if(!url){ setSyncStatus('off'); return; }
   setSyncStatus('syncing');
-  await pullStateFromServer(true);
+  // Antes de sobrescrever os dados locais, verifica se a planilha já tem algo
+  // salvo (updatedAt > 0). Se a planilha ainda estiver vazia (recém-criada),
+  // envia os dados locais para ela em vez de puxar o vazio por cima — evita
+  // apagar cadastros feitos antes de a sincronização estar 100% conectada.
+  try{
+    const vRes = await fetch(syncQS(url,'version'));
+    const v = await vRes.json();
+    if(v && v.ok && v.updatedAt > 0){
+      await pullStateFromServer(true);
+    } else if(v && v.ok){
+      await pushStateToServer();
+    } else {
+      setSyncStatus('error');
+    }
+  }catch(err){ console.error(err); setSyncStatus('error'); }
   if(!pollingStarted){
     pollingStarted = true;
     setInterval(()=>{ if(!syncing) pullStateFromServer(false); }, 20000);
