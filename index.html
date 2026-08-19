@@ -80,7 +80,17 @@ main{flex:1;padding:24px 28px 90px;max-width:1320px;width:100%;margin:0 auto;}
 .grid.four{grid-template-columns:repeat(4,1fr);}
 @media(max-width:1100px){.grid.summary{grid-template-columns:repeat(3,1fr);}.grid.two{grid-template-columns:1fr;}.grid.four{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:700px){.grid.contas{grid-template-columns:1fr;}}
-@media(max-width:640px){.grid.summary{grid-template-columns:repeat(2,1fr);}.grid.three{grid-template-columns:1fr;}.grid.four{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.grid.summary{grid-template-columns:repeat(2,1fr);}.grid.three{grid-template-columns:1fr;}.grid.four{grid-template-columns:1fr 1fr;}
+  table.responsive-table thead{display:none;}
+  table.responsive-table, table.responsive-table tbody, table.responsive-table tr, table.responsive-table td{display:block;width:100%;}
+  table.responsive-table tr{border:1px solid var(--line);border-radius:10px;margin-bottom:12px;padding:10px 12px;background:#fff;}
+  table.responsive-table tr.subrow{margin-left:10px;width:calc(100% - 10px);background:var(--off-white);}
+  table.responsive-table td{border-bottom:none;padding:7px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  table.responsive-table td[data-label]::before{content:attr(data-label);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;flex-shrink:0;}
+  table.responsive-table td[data-label=""]::before{content:none;}
+  table.responsive-table td[data-label=""]{justify-content:flex-end;}
+  table.responsive-table input[type=number]{width:130px!important;text-align:right;}
+}
 
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px;box-shadow:var(--shadow);}
 .card.pad-lg{padding:22px 24px;}
@@ -420,7 +430,7 @@ tr.subrow td:first-child{padding-left:26px;color:var(--ink-soft);font-size:12.5p
             <div class="card pad-lg">
               <p class="formnote">A meta de cada categoria é a <strong>soma automática</strong> das metas das subcategorias. Nem toda subcategoria precisa ter uma meta — deixe em branco as que não quer planejar.</p>
               <div style="overflow-x:auto;">
-              <table><thead><tr><th>Categoria</th><th>Meta planejada</th><th>Pagas</th><th>Previstas</th><th>Total gasto</th><th style="min-width:150px;">Progresso</th><th></th></tr></thead><tbody id="planTableBody"></tbody></table>
+              <table id="planTable" class="responsive-table"><thead><tr><th>Categoria</th><th>Meta planejada</th><th>Pagas</th><th>Previstas</th><th>Total gasto</th><th style="min-width:150px;">Progresso</th><th></th></tr></thead><tbody id="planTableBody"></tbody></table>
               </div>
             </div>
           </div>
@@ -1399,13 +1409,13 @@ function renderPlanejamento(){
       ? `<span class="mono" style="font-weight:700;">${fmtBRL(plan)}</span><div style="font-size:10px;color:var(--ink-soft);">soma das subcategorias</div>`
       : `<input type="number" min="0" step="0.01" value="${plan||''}" placeholder="R$ 0,00" style="width:120px;padding:6px 9px;border:1.5px solid var(--line);border-radius:7px;font-size:13px;" onchange="setPlanned('${c.nome.replace(/'/g,"\\'")}', this.value)">`;
     let rows = `<tr>
-      <td>${categoryBadge(c.nome)}</td>
-      <td>${metaCell}</td>
-      <td class="mono">${fmtBRL(d.pago)}</td>
-      <td class="mono" style="color:var(--madeira-escura);">${fmtBRL(d.previsto)}</td>
-      <td class="mono ${over?'neg':''}">${fmtBRL(d.total)}</td>
-      <td><div class="progress-track"><div class="progress-fill" style="width:${pctP}%;background:var(--verde-petroleo);"></div><div class="progress-fill" style="width:${pctPv}%;background:var(--mostarda);"></div></div><div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">${plan>0? Math.round(d.total/plan*100)+'%':'sem meta'}</div></td>
-      <td>${temSubs?'':`<button class="icobtn" onclick="setPlanned('${c.nome.replace(/'/g,"\\'")}','')" title="Limpar meta"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>`}</td>
+      <td data-label="Categoria">${categoryBadge(c.nome)}</td>
+      <td data-label="Meta planejada">${metaCell}</td>
+      <td data-label="Pagas" class="mono">${fmtBRL(d.pago)}</td>
+      <td data-label="Previstas" class="mono" style="color:var(--madeira-escura);">${fmtBRL(d.previsto)}</td>
+      <td data-label="Total gasto" class="mono ${over?'neg':''}">${fmtBRL(d.total)}</td>
+      <td data-label="Progresso"><div class="progress-track"><div class="progress-fill" style="width:${pctP}%;background:var(--verde-petroleo);"></div><div class="progress-fill" style="width:${pctPv}%;background:var(--mostarda);"></div></div><div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">${plan>0? Math.round(d.total/plan*100)+'%':'sem meta'}</div></td>
+      <td data-label="">${temSubs?'':`<button class="icobtn" onclick="setPlanned('${c.nome.replace(/'/g,"\\'")}','')" title="Limpar meta"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>`}</td>
     </tr>`;
     (c.subs||[]).forEach(sub=>{
       const sd = d.subs[sub] || {pago:0, previsto:0, total:0};
@@ -1415,13 +1425,13 @@ function renderPlanejamento(){
       const spctPv = splan>0 ? Math.min(100-spctP, sd.previsto/splan*100) : 0;
       const sover = splan>0 && sd.total>splan;
       rows += `<tr class="subrow">
-        <td>↳ ${sub}</td>
-        <td><input type="number" min="0" step="0.01" value="${splan||''}" placeholder="R$ 0,00" style="width:110px;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;font-size:12.5px;" onchange="setPlanned('${key.replace(/'/g,"\\'")}', this.value)"></td>
-        <td class="mono" style="font-size:12.5px;">${fmtBRL(sd.pago)}</td>
-        <td class="mono" style="font-size:12.5px;color:var(--madeira-escura);">${fmtBRL(sd.previsto)}</td>
-        <td class="mono ${sover?'neg':''}" style="font-size:12.5px;">${fmtBRL(sd.total)}</td>
-        <td><div class="progress-track" style="height:6px;"><div class="progress-fill" style="width:${spctP}%;background:var(--verde-petroleo);"></div><div class="progress-fill" style="width:${spctPv}%;background:var(--mostarda);"></div></div></td>
-        <td><button class="icobtn" onclick="setPlanned('${key.replace(/'/g,"\\'")}','')" title="Limpar meta"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></td>
+        <td data-label="Subcategoria">↳ ${sub}</td>
+        <td data-label="Meta planejada"><input type="number" min="0" step="0.01" value="${splan||''}" placeholder="R$ 0,00" style="width:110px;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;font-size:12.5px;" onchange="setPlanned('${key.replace(/'/g,"\\'")}', this.value)"></td>
+        <td data-label="Pagas" class="mono" style="font-size:12.5px;">${fmtBRL(sd.pago)}</td>
+        <td data-label="Previstas" class="mono" style="font-size:12.5px;color:var(--madeira-escura);">${fmtBRL(sd.previsto)}</td>
+        <td data-label="Total gasto" class="mono ${sover?'neg':''}" style="font-size:12.5px;">${fmtBRL(sd.total)}</td>
+        <td data-label="Progresso"><div class="progress-track" style="height:6px;"><div class="progress-fill" style="width:${spctP}%;background:var(--verde-petroleo);"></div><div class="progress-fill" style="width:${spctPv}%;background:var(--mostarda);"></div></div></td>
+        <td data-label=""><button class="icobtn" onclick="setPlanned('${key.replace(/'/g,"\\'")}','')" title="Limpar meta"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></td>
       </tr>`;
     });
     rows += `<tr class="subrow"><td colspan="7"><div class="addinline" style="max-width:340px;"><input placeholder="Nova subcategoria em ${c.nome}" id="plansub-${c.nome.replace(/[^a-zA-Z0-9]/g,'')}"><button onclick="addSubCatFromPlan('${c.nome.replace(/'/g,"\\'")}')">+ incluir</button></div></td></tr>`;
